@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author antoine
@@ -157,7 +157,7 @@ public class BibleApp
     }
     
     @SuppressWarnings("unused")
-    private void getVersesWithWord() throws IOException
+    private void showVersesWithWord() throws IOException
     {
         String word = readString("Word to search for:");
         
@@ -165,6 +165,12 @@ public class BibleApp
         
         WordRecord.WordLocation[] uniqueLocations = getUniqueLocations(wr);
         
+        for(int i=0; i<uniqueLocations.length; i++)
+        {
+            WordRecord.WordLocation wl = uniqueLocations[i];
+            System.out.print(String.format("[%s %d:%d] - ", wl.book.title, wl.chapter, wl.verse));
+            System.out.println(wl.toString());
+        }
     }
     
     @SuppressWarnings("unused")
@@ -191,11 +197,119 @@ public class BibleApp
             }
             
             WordRecord.WordLocation l = locations[i];
-            sb.append(String.format("[%s %d:%d]", l.book.getTitle(), l.chapter, l.verse));
+            sb.append(String.format("[%s %d:%d]", l.book.title, l.chapter, l.verse));
         }
         
         System.out.println(String.format("Locations where \"%s\" appears:", word));
         System.out.println(sb.toString());
+    }
+    
+    @SuppressWarnings("unused")
+    private void showChapterInBook() throws IOException
+    {
+        Pattern p = Pattern.compile("([a-zA-Z ,\\.]+) (\\d+)");
+        
+        Verse[] verses;
+        
+        while(true)
+        {
+            String location = readString("Enter location (Title Chapter):");
+        
+            Matcher m = p.matcher(location);
+            
+            if(!m.matches())
+                continue;
+            
+            String title = m.group(1);
+            int chapter = Integer.parseInt(m.group(2));
+            if(chapter <= 0)
+                continue;
+            
+            Book book = Book.getBook(title);
+            if(book == null)
+                continue;
+            
+            Chapter[] chapters = book.getChapters();
+            if(chapter > chapters.length)
+                continue;
+            
+            verses = chapters[chapter-1].getVerses();
+            break;
+        }
+        
+        System.out.println("Verses:");
+        for(Verse v : verses)
+        {
+            System.out.println(v.verse + " " + v.text);
+        }
+    }
+    
+    @SuppressWarnings("unused")
+    private void showVersesInBook() throws IOException
+    {
+        Pattern p = Pattern.compile("([a-zA-Z ,\\.]+) (\\d+):(\\d+)(?:\\-(\\d+))?");
+        
+        Verse[] verses;
+        
+        int startVerse, endVerse;
+        
+        while(true)
+        {
+            String location = readString("Enter location (Title Chapter:Verse[-Verse]):");
+        
+            Matcher m = p.matcher(location);
+            
+            if(!m.matches())
+                continue;
+            
+            String title   = m.group(1);
+            int chapter;
+            try
+            {
+                chapter    = Integer.parseInt(m.group(2));
+                startVerse = Integer.parseInt(m.group(3));
+                endVerse   = 0;
+                
+                if(m.group(4) != null)
+                {
+                    endVerse = Integer.parseInt(m.group(4));
+                }
+                else
+                {
+                    endVerse = startVerse;
+                }
+            }
+            catch(NumberFormatException e)
+            {
+                System.err.println(e.getMessage());
+                continue;
+            }
+            
+            if(chapter <= 0 || startVerse <= 0 || endVerse <= 0)
+                continue;
+            
+            Book book = Book.getBook(title);
+            if(book == null)
+                continue;
+            
+            Chapter[] chapters = book.getChapters();
+            if(chapter > chapters.length)
+                continue;
+            
+            verses = chapters[chapter-1].getVerses();
+            
+            if(startVerse > verses.length || endVerse < startVerse)
+                continue;
+            
+            break;
+        }
+        
+        System.out.println("Verses:");
+        for(int i=startVerse-1; i<endVerse; i++)
+        {
+            Verse v = verses[i];
+            System.out.println(v.verse + " " + v.text);
+        }
     }
     
     @SuppressWarnings("unused")
@@ -210,8 +324,10 @@ public class BibleApp
     {
         final Option[] options = new Option[] {
                                          new Option("countOccurences", "Count occurences of word"),
-                                         new Option("getVersesWithWord", "Verses where word appears"),
+                                         new Option("showVersesWithWord", "Show verses where word appears"),
                                          new Option("getLocationsOfVersesWithWord", "Location of verses where word appears"),
+                                         new Option("showChapterInBook", "Show a chapter"),
+                                         new Option("showVersesInBook", "Show a range of verses"),
                                          new Option("exitProgram", "Exit")
         };
         

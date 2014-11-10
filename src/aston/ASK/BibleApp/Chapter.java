@@ -12,19 +12,23 @@ import java.util.LinkedList;
 public final class Chapter
 {
     private LinkedList<Verse> verses;
-    private final Book book;
+    public final Book book;
+    public final int chapter; 
     
     /**
      * 
      */
-    public Chapter(Book book)
+    public Chapter(Book book, int chapter)
     {
         this.book = book;
+        this.chapter = chapter;
+        
+        verses = new LinkedList<Verse>();
     }
 
-    public final Verse addVerse(String text)
+    public final Verse addVerse(String text, int verse)
     {
-        Verse v = new Verse(this, text);
+        Verse v = new Verse(this, verse, text);
         verses.add(v);
         
         return v;

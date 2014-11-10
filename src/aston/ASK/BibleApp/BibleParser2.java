@@ -45,6 +45,8 @@ public final class BibleParser2
                 String title = bp.br.readLine();
                 bp.book = new Book(title, file);
                 
+                Chapter chapter = null;
+                
                 String line;
                 while((line = bp.br.readLine()) != null)
                 {
@@ -53,9 +55,10 @@ public final class BibleParser2
                         continue; //Skip blank lines
                     }
                     
-                    if(line.startsWith("CHAPTER"))
+                    if(line.startsWith("CHAPTER") || line.startsWith("PSALM"))
                     {
                         bp.currentChapter = Integer.parseInt(line.split(" ")[1]);
+                        chapter = bp.book.newChapter(bp.currentChapter);
                     }
                     else
                     {
@@ -72,6 +75,8 @@ public final class BibleParser2
 //                            System.err.println("Line: " + line);
                             continue;
                         }
+                        
+                        chapter.addVerse(line.replaceFirst("^[0-9]+ ", ""), bp.currentVerse);
                         
                         for(int i=1; i < lineBits.length; i++)
                         {

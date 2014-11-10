@@ -24,6 +24,11 @@ public final class WordRecord
         {
             return (wl.wr == wr && wl.book.equals(this.book) && wl.chapter == this.chapter && wl.verse == this.verse);
         }
+        
+        final public String toString()
+        {
+            return book.getChapters()[chapter-1].getVerses()[verse-1].text;
+        }
     }
     
     private final String word;

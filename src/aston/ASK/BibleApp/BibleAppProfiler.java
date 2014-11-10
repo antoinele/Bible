@@ -1,9 +1,5 @@
 package aston.ASK.BibleApp;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 public class BibleAppProfiler
 {
     @interface Profile {
