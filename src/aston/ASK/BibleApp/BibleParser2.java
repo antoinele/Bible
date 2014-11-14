@@ -22,42 +22,47 @@ public final class BibleParser2
      */
     private static class ThreadedFileRead extends Thread {
         private final Queue<String> queue;
+        private final BufferedReader br;
         
-        public ThreadedFileRead(int threadN, Queue<String> queue)
+        public ThreadedFileRead(BufferedReader br, int threadN, Queue<String> queue)
         {
             setName("parseline-thread-" + threadN);
+            this.br = br;
             this.queue = queue;
         }
         
         @Override
         public void run() {
-            while(true)
+            String line;
+            try
             {
-                ParseLineWork work;
-                
-                try {
-                    synchronized(queue)
+                while((line = br.readLine()) != null)
+                {
+                    if(line.length() == 0)
                     {
-                        while(queue.isEmpty())
-                        {
-                            queue.wait();
-                        }
-                         
-                        work = queue.remove();
+                        continue; //Skip blank lines
                     }
                     
-                    parseLine(bp, work.chapter, work.line);
-                    
+                    synchronized(queue)
+                    {
+                        queue.add(line.substring(0)); //I hope this copies a string
+                        queue.notify();
+                    }
                 }
-                catch(InterruptedException e)
-                {
-                    break;
-                }
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            
+            synchronized(queue)
+            {
+                queue.add("-STOP-");
+                queue.notify();
             }
         }
     }
-    
-    public static boolean multithreaded;
     
     private Book book;
     private final WordMap wm;
@@ -118,12 +123,8 @@ public final class BibleParser2
         }
     }
     
-    static public final WordMap parseFiles(String[] files, final boolean multithreaded)
-    {        
-        BibleParser2.multithreaded = multithreaded;
-        if(multithreaded)
-            return parseFilesMT(files, true);
-        
+    static public final WordMap parseFiles(String[] files)
+    {   
         BibleParser2 bp = new BibleParser2();
         
         for(String file : files)
@@ -190,88 +191,72 @@ public final class BibleParser2
         return bp.wm;
     }
     
-    static public final WordMap parseFilesMT(String[] files, final boolean multithreaded)
+    static public final WordMap parseFilesMT(String[] files)
     {
-        Queue<ParseLineWork> lineBuffer = null;
-        ThreadedFileRead tfr = null;
-        
-        BibleParser2.multithreaded = multithreaded;
-        
         BibleParser2 bp = new BibleParser2();
-        
-        lineBuffer = new LinkedBlockingQueue<lineBuffer>();
-        
-//            int cores = Runtime.getRuntime().availableProcessors();
-        int cores = 1;
-        
-        tfr = new ThreadedParseLine[cores];
-        
-        for(int i=0; i<cores; i++)
-        {
-            workers[i] = new ThreadedParseLine(bp, i, workQueue);
-            workers[i].start();
-        }
         
         for(String file : files)
         {
+            Queue<String> lineBuffer;
+            ThreadedFileRead tfr = null;
+        
+            lineBuffer = new LinkedBlockingQueue<String>();
+            
             try
             {
                 bp.br = new BufferedReader(new FileReader(file), 32768);
+                
+
                 
                 String title = bp.br.readLine();
                 bp.book = new Book(title, file);
                 
                 Chapter chapter = null;
                 
+                tfr = new ThreadedFileRead(bp.br, 1, lineBuffer);
+                tfr.start();
+                
                 String line;
-                while((line = bp.br.readLine()) != null)
+                while(true)
                 {
-                    if(line.length() == 0)
+                    synchronized(lineBuffer)
                     {
-                        continue; //Skip blank lines
-                    }
-                    
-                    if(line.startsWith("CHAPTER") || line.startsWith("PSALM"))
-                    {
-                        int currentChapter = Integer.parseInt(line.split(" ")[1]);
-                        chapter = bp.book.newChapter(currentChapter);
-                    }
-                    else
-                    {
-                        if(multithreaded)
+                        while(lineBuffer.isEmpty())
                         {
-                            synchronized(workQueue)
+                            try
                             {
-                                workQueue.add(new ParseLineWork(chapter, line));
-                                workQueue.notify();
+                                lineBuffer.wait();
                             }
+                            catch (InterruptedException e)
+                            {
+                                break;
+                            }
+                        }
+                        
+                        line = lineBuffer.remove();
+                        if("-STOP-".equals(line))
+                        {
+                            break;
+                        }
+                        
+                        if(line.length() == 0)
+                        {
+                            continue; //Skip blank lines
+                        }
+                        
+                        if(line.startsWith("CHAPTER") || line.startsWith("PSALM"))
+                        {
+                            int currentChapter = Integer.parseInt(line.split(" ")[1]);
+                            chapter = bp.book.newChapter(currentChapter);
                         }
                         else
                         {
                             parseLine(bp, chapter, line);
                         }
-//                        String[] lineBits = line.toLowerCase().split(" ");
-//                        
-//                        try
-//                        {
-//                            bp.currentVerse = Integer.parseInt(lineBits[0]);
-//                        }
-//                        catch(NumberFormatException e)
-//                        {
-//                            //This happens a lot, seems to be a bit of optional text which isn't very significant
-////                            System.err.println("Invalid Line?");
-////                            System.err.println("Line: " + line);
-//                            continue;
-//                        }
-//                        
-//                        chapter.addVerse(line.replaceFirst("^[0-9]+ ", ""), bp.currentVerse);
-//                        
-//                        for(int i=1; i < lineBits.length; i++)
-//                        {
-//                            bp.wm.countWord(bp.book, bp.currentChapter, bp.currentVerse, lineBits[i]);
-//                        }
                     }
                 }
+                
+                tfr.interrupt();
                 
                 bp.br.close();
             }
@@ -281,14 +266,6 @@ public final class BibleParser2
                 continue;
             }
 
-        }
-        
-        if(multithreaded)
-        {
-            for(int i=0; i<workers.length; i++)
-            {
-                workers[i].interrupt();
-            }
         }
         
         return bp.wm;

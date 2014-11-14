@@ -363,7 +363,7 @@ public class BibleApp
             args = Arrays.copyOfRange(args, 1, args.length);
         }
         
-        WordMap wm = BibleParser2.parseFiles(args, mt);
+        WordMap wm = BibleParser2.parseFiles(args);
         BibleApp ba = new BibleApp(wm);
         ba.start();
     }

@@ -23,7 +23,7 @@ public class BibleAppProfiler
         {
             System.out.print("Cycle #"+i+" ");
             @SuppressWarnings("unused")
-            WordMap wm = BibleParser2.parseFiles(files, false);
+            WordMap wm = BibleParser2.parseFiles(files);
         }
         long end = System.nanoTime();
         
@@ -33,12 +33,12 @@ public class BibleAppProfiler
         
         {
             double parseTime = Double.valueOf(end - start) / (CYCLES * 1000_000_000d);
-            System.out.println(String.format("  Average parse time: %f seconds (%f/second)", parseTime, 1/parseTime));
+            System.out.println(String.format("  Average parse time: %f seconds (%f files/second)", parseTime, 1/parseTime));
         }
         
         {
             double parseTime = Double.valueOf(end - start) / (CYCLES * files.length * 1000_000_000d);
-            System.out.println(String.format("  Average parse time per file: %f/second (%f/second)", parseTime, 1/parseTime));
+            System.out.println(String.format("  Average parse time per file: %f/second", parseTime));
         }
     }
     
@@ -52,7 +52,7 @@ public class BibleAppProfiler
         {
             System.out.print("Cycle #"+i+" ");
             @SuppressWarnings("unused")
-            WordMap wm = BibleParser2.parseFiles(files, true);
+            WordMap wm = BibleParser2.parseFiles(files);
         }
         long end = System.nanoTime();
         
@@ -62,12 +62,12 @@ public class BibleAppProfiler
         
         {
             double parseTime = Double.valueOf(end - start) / (CYCLES * 1000_000_000d);
-            System.out.println(String.format("  Average parse time: %f seconds (%f/second)", parseTime, 1/parseTime));
+            System.out.println(String.format("  Average parse time: %f seconds (%f files/second)", parseTime, 1/parseTime));
         }
         
         {
             double parseTime = Double.valueOf(end - start) / (CYCLES * files.length * 1000_000_000d);
-            System.out.println(String.format("  Average parse time per file: %f/second (%f/second)", parseTime, 1/parseTime));
+            System.out.println(String.format("  Average parse time per file: %f/second", parseTime));
         }
     }
     
@@ -77,7 +77,7 @@ public class BibleAppProfiler
         final int CYCLES = 100;
         String WORD = "and";
         
-        WordMap wm = BibleParser2.parseFiles(files, false);
+        WordMap wm = BibleParser2.parseFilesMT(files);
         
         long start = System.nanoTime();
         for(int i=0; i < CYCLES; i++)
@@ -93,7 +93,7 @@ public class BibleAppProfiler
         
         {
             double parseTime = Double.valueOf(end - start) / (CYCLES * 1000_000_000d);
-            System.out.println(String.format("  Average search time: %f seconds (%f/second)", parseTime, 1/parseTime));
+            System.out.println(String.format("  Average search time: %f seconds (%f searches/second)", parseTime, 1/parseTime));
         }
         
 //        {
