@@ -52,7 +52,7 @@ public class BibleAppProfiler
         {
             System.out.print("Cycle #"+i+" ");
             @SuppressWarnings("unused")
-            WordMap wm = BibleParser2.parseFiles(files);
+            WordMap wm = BibleParser2.parseFilesMT(files);
         }
         long end = System.nanoTime();
         
