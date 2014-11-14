@@ -38,7 +38,7 @@ public final class WordMap
         }
     }
 
-    //TODO: Reinvestigate the viability of this function; the conversion from char array to String is very slow.
+//    //TODO: Reinvestigate the viability of this function; the conversion from char array to String is very slow.
 //    /**
 //     * Quickly converts uppercase words to lowercase under the assumption that they're alphabetic only
 //     * @param string
@@ -53,7 +53,7 @@ public final class WordMap
 //            ca[i] = (char) (ca[i] & ~0x20); //The 6th bit of an ASCII character determines whether it is upper or lowercase. Here we force it to zero
 //        }
 //        
-//        return new String(ca);
+//        return new String();
 //    }
     
     public final WordRecord get(String word)

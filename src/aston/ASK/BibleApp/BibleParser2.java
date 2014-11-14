@@ -16,6 +16,47 @@ import java.util.concurrent.LinkedBlockingQueue;
 public final class BibleParser2
 {
     /**
+     * Quickly converts uppercase words to lowercase under the assumption that they're alphabetic only
+     * @param string
+     * @return
+     */
+    private static final String fastLowercaseStrip(String string)
+    {
+        char[] ca = string.toCharArray();
+        char[] newca = new char[string.length()];
+        
+        int j = 0;
+        
+        for(int i=0; i<ca.length; i++)
+        {
+            if( (ca[i] <= 'Z' && ca[i] >= 'A') || (ca[i] <= 'z' && ca[i] >= 'a') )
+            {
+                newca[j] = (char) (ca[i] | (1 << 5)); //The 6th bit of an ASCII character determines whether it is upper or lowercase. Here we force it to zero
+                j++;
+            }
+            else if( ca[i] == ' ' || (ca[i] <= '9' && ca[i] >= '0') ) 
+            {
+                newca[j] = ca[i];
+                j++;
+            }
+        }
+        
+        return new String(newca, 0, j);
+    }
+    
+    private static final String fastLowercase(String s)
+    {
+        char[] ca = s.toCharArray();
+        
+        for(int i=0; i<ca.length; i++)
+        {
+            ca[i] = (char) (ca[i] | (1 << 5)); //The 6th bit of an ASCII character determines whether it is upper or lowercase. Here we force it to zero
+        }
+        
+        return new String(ca);
+    }
+    
+    /**
      * Based off of example from: http://www.drdobbs.com/parallel/java-concurrency-queue-processing-part-1/232700457
      * @author antoine
      *
@@ -45,7 +86,7 @@ public final class BibleParser2
                     
                     synchronized(queue)
                     {
-                        queue.add(line.substring(0)); //I hope this copies a string
+                        queue.add(new String(line)); //I hope this copies a string
                         queue.notify();
                     }
                 }
@@ -81,6 +122,7 @@ public final class BibleParser2
     /**
      * Extracts and parses words indidually by using indexOf and substring instead of string.split().
      * Causes a massive speed improvement over the previous method
+     * Assumes input to be lowercase
      * @param bp
      * @param chapter
      * @param line
@@ -89,7 +131,8 @@ public final class BibleParser2
     {
         int currentVerse;
 //        String[] lineBits = line.toLowerCase().split(" ");
-        line = line.toLowerCase();
+//        line = line.toLowerCase();
+//        line = fastLowercaseStrip(line);
         
         final int verseEnd = line.indexOf(' ');
         
@@ -115,7 +158,7 @@ public final class BibleParser2
         
         while((end = line.indexOf(' ', pos)) >= 0)
         {
-            final String word = line.substring(pos, end);
+            final String word = fastLowercase(line.substring(pos, end));
             
             bp.wm.countWord(bp.book, chapter.chapter, currentVerse, word);
             
