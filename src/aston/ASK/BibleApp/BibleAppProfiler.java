@@ -23,7 +23,36 @@ public class BibleAppProfiler
         {
             System.out.print("Cycle #"+i+" ");
             @SuppressWarnings("unused")
-            WordMap wm = BibleParser2.parseFiles(files);
+            WordMap wm = BibleParser2.parseFiles(files, false);
+        }
+        long end = System.nanoTime();
+        
+        System.out.println();
+        
+        System.out.println(String.format("%d parses took: %d nanoseconds, parsing %d files each time", CYCLES, end - start, files.length));
+        
+        {
+            double parseTime = Double.valueOf(end - start) / (CYCLES * 1000_000_000d);
+            System.out.println(String.format("  Average parse time: %f seconds (%f/second)", parseTime, 1/parseTime));
+        }
+        
+        {
+            double parseTime = Double.valueOf(end - start) / (CYCLES * files.length * 1000_000_000d);
+            System.out.println(String.format("  Average parse time per file: %f/second (%f/second)", parseTime, 1/parseTime));
+        }
+    }
+    
+    @Profile
+    public static void fileParsingProfilerMT()
+    {        
+        final int CYCLES = 100;
+        
+        long start = System.nanoTime();
+        for(int i=0; i < CYCLES; i++)
+        {
+            System.out.print("Cycle #"+i+" ");
+            @SuppressWarnings("unused")
+            WordMap wm = BibleParser2.parseFiles(files, true);
         }
         long end = System.nanoTime();
         
@@ -48,7 +77,7 @@ public class BibleAppProfiler
         final int CYCLES = 100;
         String WORD = "and";
         
-        WordMap wm = BibleParser2.parseFiles(files);
+        WordMap wm = BibleParser2.parseFiles(files, false);
         
         long start = System.nanoTime();
         for(int i=0; i < CYCLES; i++)
@@ -101,6 +130,9 @@ public class BibleAppProfiler
         
         System.out.println("Profile file parsing");
         fileParsingProfiler();
+        
+        System.out.println("Profile file parsing (Multithreaded)");
+        fileParsingProfilerMT();
         
         System.out.println("Profile searching");
         searchProfiler();

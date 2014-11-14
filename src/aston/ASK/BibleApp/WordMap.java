@@ -1,100 +1,84 @@
 package aston.ASK.BibleApp;
 
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
-public final class WordMap implements Map<String, WordRecord>
+/**
+ * Works under the assumption that all words given to it are lowercase
+ * @author antoine
+ *
+ */
+public final class WordMap
 {
 
-    private TreeMap<String, WordRecord> tree;
+    final private Map<String, WordRecord> map;
     
     public WordMap()
     {
-        tree = new TreeMap<String, WordRecord>();
+        this(false);
+    }
+    
+    public WordMap(boolean multithreaded)
+    {
+        /**
+         * Used this command:
+         * $ cat KJBible/* | tr '[:upper:]' '[:lower:]' | sed 's/[0-9]//g' | sed 's/\r//g' | sed -e 's/\s\+/\n/g' | sed 's/[^a-z\n]//g' | tr -cd '\11\12\15\40-\176' | sort | uniq | wc -l
+12731
+         * to determine the number of unique words in the bible
+         */
+        
+        if(multithreaded)
+        {
+            map = new Hashtable<String, WordRecord>(13000);
+        }
+        else
+        {
+            map = new HashMap<String, WordRecord>(13000);
+        }
     }
 
-    @Override
-    public void clear()
+    //TODO: Reinvestigate the viability of this function; the conversion from char array to String is very slow.
+//    /**
+//     * Quickly converts uppercase words to lowercase under the assumption that they're alphabetic only
+//     * @param string
+//     * @return
+//     */
+//    private static final String fastLowercase(String string)
+//    {
+//        char[] ca = string.toCharArray();
+//        
+//        for(int i=0; i<ca.length; i++)
+//        {
+//            ca[i] = (char) (ca[i] & ~0x20); //The 6th bit of an ASCII character determines whether it is upper or lowercase. Here we force it to zero
+//        }
+//        
+//        return new String(ca);
+//    }
+    
+    public final WordRecord get(String word)
     {
-        tree.clear();
+        return map.get(word);
+//        return map.get(fastLowercase(word));
     }
-
-    @Override
-    public boolean containsKey(Object word)
+    
+    public final WordRecord put(String word, WordRecord record)
     {
-        return tree.containsKey(((String)word).toLowerCase());
-    }
-
-    @Override
-    public boolean containsValue(Object arg0)
-    {
-        return tree.containsValue(arg0);
-    }
-
-    @Override
-    public Set<java.util.Map.Entry<String, WordRecord>> entrySet()
-    {
-        return tree.entrySet();
-    }
-
-    @Override
-    public WordRecord get(Object word)
-    {
-        return tree.get(((String)word).toLowerCase());
-    }
-
-    @Override
-    public boolean isEmpty()
-    {
-        return tree.isEmpty();
-    }
-
-    @Override
-    public Set<String> keySet()
-    {
-        return tree.keySet();
-    }
-
-    @Override
-    public WordRecord put(String word, WordRecord record)
-    {
-        word = word.toLowerCase();
-        tree.put(word, record);
+//        word = word.toLowerCase();
+//        word = fastLowercase(word);
+        map.put(word, record);
         
         return record; // Not sure if this is how it's supposed to be
     }
 
-    @Override
-    public void putAll(Map<? extends String, ? extends WordRecord> arg0)
+    public final int size()
     {
-        tree.putAll(arg0);
-    }
-
-    @Override
-    public WordRecord remove(Object arg0)
-    {
-        tree.remove(arg0);
-        
-        return (WordRecord) arg0;
-    }
-
-    @Override
-    public int size()
-    {
-        return tree.size();
-    }
-
-    @Override
-    public Collection<WordRecord> values()
-    {
-        return tree.values();
+        return map.size();
     }
 
     public final void countWord(Book book, int chapter, int verse, String word)
     {
-        word = word.toLowerCase();
+//        word = fastLowercase(word);
         WordRecord wr = this.get(word);
         
         if(wr == null)

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -355,7 +356,14 @@ public class BibleApp
      */
     public static void main(String[] args)
     {
-        WordMap wm = BibleParser2.parseFiles(args);
+        boolean mt = false;
+        if(args[0].equals("--mt"))
+        {
+            mt = true;
+            args = Arrays.copyOfRange(args, 1, args.length);
+        }
+        
+        WordMap wm = BibleParser2.parseFiles(args, mt);
         BibleApp ba = new BibleApp(wm);
         ba.start();
     }
