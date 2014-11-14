@@ -144,8 +144,8 @@ public final class BibleParser2
         {
             workQueue = new LinkedBlockingQueue<ParseLineWork>();
             
-//            int cores = Runtime.getRuntime().availableProcessors();
-            int cores = 1;
+            int cores = Runtime.getRuntime().availableProcessors();
+//            int cores = 1;
             
             workers = new ThreadedParseLine[cores];
             
