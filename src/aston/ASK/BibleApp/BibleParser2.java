@@ -20,41 +20,66 @@ public final class BibleParser2
      * @param string
      * @return
      */
-    private static final String fastLowercaseStrip(String string)
+    public static final String fastLowercaseStrip(String s)
     {
-        char[] ca = string.toCharArray();
-        char[] newca = new char[string.length()];
+        final int slen = s.length();
+        StringBuffer sb = new StringBuffer(slen);
         
-        int j = 0;
+//        int j=0;
         
-        for(int i=0; i<ca.length; i++)
+        for(int i=0; i<slen; i++)
         {
-            if( (ca[i] <= 'Z' && ca[i] >= 'A') || (ca[i] <= 'z' && ca[i] >= 'a') )
+            final char c = s.charAt(i);
+            
+            if( (c <= 'Z' && c >= 'A') || (c <= 'z' && c >= 'a') )
             {
-                newca[j] = (char) (ca[i] | (1 << 5)); //The 6th bit of an ASCII character determines whether it is upper or lowercase. Here we force it to zero
-                j++;
+                final char nc = (char)(c | (1<<5));
+                
+                sb.append(nc);
             }
-            else if( ca[i] == ' ' || (ca[i] <= '9' && ca[i] >= '0') ) 
+            else if( c == ' ' || (c <= '9' && c >= '0') )
             {
-                newca[j] = ca[i];
-                j++;
+                sb.append(c);
             }
         }
         
-        return new String(newca, 0, j);
+        return sb.toString();
     }
+//    public static final String fastLowercaseStrip(String string)
+//    {
+//        char[] ca = string.toCharArray();
+//        char[] newca = new char[string.length()];
+//        
+//        int j = 0;
+//        
+//        for(int i=0; i<ca.length; i++)
+//        {
+//            if( (ca[i] <= 'Z' && ca[i] >= 'A') || (ca[i] <= 'z' && ca[i] >= 'a') )
+//            {
+//                newca[j] = (char) (ca[i] | (1 << 5)); //The 6th bit of an ASCII character determines whether it is upper or lowercase. Here we force it to zero
+//                j++;
+//            }
+//            else if( ca[i] == ' ' || (ca[i] <= '9' && ca[i] >= '0') ) 
+//            {
+//                newca[j] = ca[i];
+//                j++;
+//            }
+//        }
+//        
+//        return new String(newca, 0, j);
+//    }
     
-    private static final String fastLowercase(String s)
-    {
-        char[] ca = s.toCharArray();
-        
-        for(int i=0; i<ca.length; i++)
-        {
-            ca[i] = (char) (ca[i] | (1 << 5)); //The 6th bit of an ASCII character determines whether it is upper or lowercase. Here we force it to zero
-        }
-        
-        return new String(ca);
-    }
+//    private static final String fastLowercase(String s)
+//    {
+//        char[] ca = s.toCharArray();
+//        
+//        for(int i=0; i<ca.length; i++)
+//        {
+//            ca[i] = (char) (ca[i] | (1 << 5)); //The 6th bit of an ASCII character determines whether it is upper or lowercase. Here we force it to zero
+//        }
+//        
+//        return new String(ca);
+//    }
     
     /**
      * Based off of example from: http://www.drdobbs.com/parallel/java-concurrency-queue-processing-part-1/232700457
@@ -132,7 +157,7 @@ public final class BibleParser2
         int currentVerse;
 //        String[] lineBits = line.toLowerCase().split(" ");
 //        line = line.toLowerCase();
-//        line = fastLowercaseStrip(line);
+        line = fastLowercaseStrip(line);
         
         final int verseEnd = line.indexOf(' ');
         
@@ -158,7 +183,7 @@ public final class BibleParser2
         
         while((end = line.indexOf(' ', pos)) >= 0)
         {
-            final String word = fastLowercase(line.substring(pos, end));
+            final String word = line.substring(pos, end);
             
             bp.wm.countWord(bp.book, chapter.chapter, currentVerse, word);
             

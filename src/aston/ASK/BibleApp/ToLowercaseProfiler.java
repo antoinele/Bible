@@ -11,7 +11,7 @@ import java.util.Random;
  */
 public final class ToLowercaseProfiler
 {
-    final static int CYCLES = 1000000;
+    final static int CYCLES = 2_000_000;
     final static String[] strings = new String[CYCLES];
     
     /**
@@ -22,7 +22,7 @@ public final class ToLowercaseProfiler
         // TODO Auto-generated constructor stub
     }
 
-    static final String AB = ".?!,0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ";
+    static final String AB = "[].?!,\"'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ";
     static Random rnd = new Random();
     
     static String randomString( int len ) 
@@ -71,7 +71,7 @@ public final class ToLowercaseProfiler
 //        return new String(ca);
 //    }
     
-    private static final String fastLowercaseStrip(String string)
+    private static final String fastLowercaseStripArray(String string)
     {
         char[] ca = string.toCharArray();
         char[] newca = new char[string.length()];
@@ -95,34 +95,54 @@ public final class ToLowercaseProfiler
         return new String(newca, 0, j);
     }
     
-    private static void testFastLowercase()
+    private static final String stripNonAlphaNumeric(String string)
     {
-        final String[] out = new String[CYCLES];
+        final int slen = string.length();
+        StringBuffer sb = new StringBuffer(slen);
         
+        for(int i=0; i<slen; i++)
+        {
+            char c=string.charAt(i);
+            if( (c <= 'z' && c >= 'a') || c == ' ' )
+            {
+                sb.append(c);
+            }
+        }
+        
+        return sb.toString();
+    }
+    
+    private static void testFastLowercaseStrip()
+    {
         long start = System.nanoTime();
         for(int i=0; i<CYCLES; i++)
         {
-            out[i] = fastLowercaseStrip(strings[i]);
+            BibleParser2.fastLowercaseStrip(strings[i]);
         }
         long end = System.nanoTime();
         
-        int invalid = 0;
+        System.out.println();
         
+        System.out.println(String.format("%d lowercasings took: %d nanoseconds.", CYCLES, end - start));
+        
+        {
+            double parseTime = Double.valueOf(end - start) / (CYCLES * 1000_000_000d);
+            System.out.println(String.format("  Average lowercase time: %f seconds (%f lowercases/second)", parseTime, 1/parseTime));
+        }
+    }
+        
+    private static void testJavaLowercaseStripArray()
+    {
+        long start = System.nanoTime();
         for(int i=0; i<CYCLES; i++)
         {
-            if( (i % 1000) == 0 )
-            {
-                System.out.println(String.format("%s vs %s", out[i], strings[i]));
-            }
-            if(!out[i].equalsIgnoreCase(strings[i].replaceAll("[^A-Za-z0-9 ]", "")))
-            {
-                invalid++;
-            }
+            fastLowercaseStripArray(strings[i]);
         }
+        long end = System.nanoTime();
         
         System.out.println();
         
-        System.out.println(String.format("%d lowercasings took: %d nanoseconds. %d were invalid.", CYCLES, end - start, invalid));
+        System.out.println(String.format("%d lowercasings took: %d nanoseconds", CYCLES, end - start));
         
         {
             double parseTime = Double.valueOf(end - start) / (CYCLES * 1000_000_000d);
@@ -130,12 +150,33 @@ public final class ToLowercaseProfiler
         }
     }
     
-    private static void testJavaLowercase()
+    private static void testJavaLowercaseStrip()
     {
         long start = System.nanoTime();
         for(int i=0; i<CYCLES; i++)
         {
-            strings[i].toLowerCase();
+            String s = strings[i].toLowerCase();
+            s.replaceAll("^[a-z0-9\\s]", "");
+        }
+        long end = System.nanoTime();
+        
+        System.out.println();
+        
+        System.out.println(String.format("%d lowercasings took: %d nanoseconds", CYCLES, end - start));
+        
+        {
+            double parseTime = Double.valueOf(end - start) / (CYCLES * 1000_000_000d);
+            System.out.println(String.format("  Average lowercase time: %f seconds (%f lowercases/second)", parseTime, 1/parseTime));
+        }
+    }
+
+    private static void testJavaLowercaseStrip2()
+    {
+        long start = System.nanoTime();
+        for(int i=0; i<CYCLES; i++)
+        {
+            String s = strings[i].toLowerCase();
+            stripNonAlphaNumeric(s);
         }
         long end = System.nanoTime();
         
@@ -159,15 +200,17 @@ public final class ToLowercaseProfiler
             strings[i] = randomString(20);
         }
         
-        System.out.println(~(1 << 5));
-        
-        System.out.println(String.format("%c, %c", 'A', (char)('A' | (1 << 5))));
-        
         System.out.print("Profiling fast lowercase");
-        testFastLowercase();
+        testFastLowercaseStrip();
+        
+        System.out.print("Profiling fast lowercase (original array version)");
+        testJavaLowercaseStripArray();
         
         System.out.print("Profiling java lowercase");
-        testJavaLowercase();
+        testJavaLowercaseStrip();
+        
+        System.out.print("Profiling java lowercase - manual strip");
+        testJavaLowercaseStrip2();
     }
 
 }
