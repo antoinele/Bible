@@ -1,7 +1,7 @@
 /**
  * 
  */
-package aston.ASK.BibleApp;
+package aston.ASK.BibleApp.Model;
 
 import java.util.LinkedList;
 

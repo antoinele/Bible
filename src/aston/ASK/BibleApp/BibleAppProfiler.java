@@ -1,5 +1,8 @@
 package aston.ASK.BibleApp;
 
+import aston.ASK.BibleApp.Model.BibleParser2;
+import aston.ASK.BibleApp.Model.WordMap;
+
 public class BibleAppProfiler
 {
     @interface Profile {

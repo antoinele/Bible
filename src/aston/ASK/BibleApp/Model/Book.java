@@ -1,4 +1,4 @@
-package aston.ASK.BibleApp;
+package aston.ASK.BibleApp.Model;
 
 import java.util.HashMap;
 import java.util.LinkedList;

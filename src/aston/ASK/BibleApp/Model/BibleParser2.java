@@ -1,7 +1,7 @@
 /**
  * 
  */
-package aston.ASK.BibleApp;
+package aston.ASK.BibleApp.Model;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -15,6 +15,30 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public final class BibleParser2
 {
+    private static final String fastLowercaseStrip(String string)
+    {
+        final char[] ca = string.toCharArray();
+        char[] newca = new char[string.length()];
+        
+        int j = 0;
+        
+        for(int i=0; i<ca.length; i++)
+        {
+            final char c = ca[i];
+            if( (c <= 'Z' && c >= 'A') || (c <= 'z' && c >= 'a') )
+            {
+                newca[j] = (char) (c | (1 << 5)); //The 6th bit of an ASCII character determines whether it is upper or lowercase. Here we force it to zero
+                j++;
+            }
+            else if( c == ' ' || (c <= '9' && c >= '0') ) 
+            {
+                newca[j] = c;
+                j++;
+            }
+        }
+        
+        return new String(newca, 0, j);
+    }
     /**
      * Based off of example from: http://www.drdobbs.com/parallel/java-concurrency-queue-processing-part-1/232700457
      * @author antoine
@@ -89,7 +113,8 @@ public final class BibleParser2
     {
         int currentVerse;
 //        String[] lineBits = line.toLowerCase().split(" ");
-        line = line.toLowerCase();
+//        line = line.toLowerCase();
+        line = fastLowercaseStrip(line);
         
         final int verseEnd = line.indexOf(' ');
         
