@@ -21,7 +21,11 @@ public class BibleAppProfiler
         long start = System.nanoTime();
         for(int i=0; i < CYCLES; i++)
         {
-            System.out.print("Cycle #"+i+" ");
+            if((i%10)==0)
+                System.out.println();
+            if((i % 5)==0)
+                System.out.print(String.format("Cycle #%d ",i));
+            
             @SuppressWarnings("unused")
             WordMap wm = BibleParser2.parseFiles(files);
         }
@@ -131,8 +135,8 @@ public class BibleAppProfiler
         System.out.println("Profile file parsing");
         fileParsingProfiler();
         
-        System.out.println("Profile file parsing (Multithreaded)");
-        fileParsingProfilerMT();
+//        System.out.println("Profile file parsing (Multithreaded)");
+//        fileParsingProfilerMT();
         
         System.out.println("Profile searching");
         searchProfiler();
