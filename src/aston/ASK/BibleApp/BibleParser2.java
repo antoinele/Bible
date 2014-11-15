@@ -123,6 +123,8 @@ public final class BibleParser2
         }
     }
     
+    static private final int READBUFFERSIZE = 32768; //32768
+    
     static public final WordMap parseFiles(String[] files)
     {   
         BibleParser2 bp = new BibleParser2();
@@ -131,7 +133,7 @@ public final class BibleParser2
         {
             try
             {
-                bp.br = new BufferedReader(new FileReader(file), 32768);
+                bp.br = new BufferedReader(new FileReader(file), READBUFFERSIZE);
                 
                 String title = bp.br.readLine();
                 bp.book = new Book(title, file);
@@ -153,28 +155,7 @@ public final class BibleParser2
                     }
                     else
                     {
-
                         parseLine(bp, chapter, line);
-//                        String[] lineBits = line.toLowerCase().split(" ");
-//                        
-//                        try
-//                        {
-//                            bp.currentVerse = Integer.parseInt(lineBits[0]);
-//                        }
-//                        catch(NumberFormatException e)
-//                        {
-//                            //This happens a lot, seems to be a bit of optional text which isn't very significant
-////                            System.err.println("Invalid Line?");
-////                            System.err.println("Line: " + line);
-//                            continue;
-//                        }
-//                        
-//                        chapter.addVerse(line.replaceFirst("^[0-9]+ ", ""), bp.currentVerse);
-//                        
-//                        for(int i=1; i < lineBits.length; i++)
-//                        {
-//                            bp.wm.countWord(bp.book, bp.currentChapter, bp.currentVerse, lineBits[i]);
-//                        }
                     }
                 }
                 
@@ -204,7 +185,7 @@ public final class BibleParser2
             
             try
             {
-                bp.br = new BufferedReader(new FileReader(file), 32768);
+                bp.br = new BufferedReader(new FileReader(file), READBUFFERSIZE);
                 
 
                 
