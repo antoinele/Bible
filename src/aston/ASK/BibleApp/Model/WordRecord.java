@@ -11,6 +11,7 @@ public final class WordRecord
         public final Book book;
         public final int chapter;
         public final int verse;
+        public int count; // number of times a word appears in a verse
         
         private WordLocation(WordRecord wr, Book book, int chapter, int verse)
         {
@@ -18,6 +19,7 @@ public final class WordRecord
             this.book = book;
             this.chapter = chapter;
             this.verse = verse;
+            this.count = 1;
         }
         
         final public boolean equals(WordLocation wl)
@@ -32,7 +34,7 @@ public final class WordRecord
     }
     
     private final String word;
-    private LinkedList<WordLocation> appearances;
+    private final LinkedList<WordLocation> appearances;
     
     public WordRecord(String word)
     {
@@ -42,8 +44,17 @@ public final class WordRecord
     
     public final void record(Book book, int chapter, int verse)
     {
-        WordLocation wl = new WordLocation(this, book, chapter, verse);
-        appearances.add(wl);
+        final WordLocation lastLocation = appearances.peekLast();
+        
+        if(lastLocation != null && lastLocation.book.equals(book) && lastLocation.chapter == chapter && lastLocation.verse == verse)
+        {
+            lastLocation.count++;
+        }
+        else
+        {
+            WordLocation wl = new WordLocation(this, book, chapter, verse);
+            appearances.add(wl);
+        }
     }
     
     public final String getWord()
@@ -54,6 +65,18 @@ public final class WordRecord
     public final WordLocation[] getAppearances()
     {
         return appearances.toArray(new WordLocation[appearances.size()]); 
+    }
+    
+    public final int appearanceCount()
+    {
+        int count = 0;
+        
+        for(WordLocation wl : appearances)
+        {
+            count += wl.count;
+        }
+        
+        return count;
     }
 
     @Override
