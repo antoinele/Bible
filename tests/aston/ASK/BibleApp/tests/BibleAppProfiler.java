@@ -1,4 +1,4 @@
-package aston.ASK.BibleApp;
+package aston.ASK.BibleApp.tests;
 
 import aston.ASK.BibleApp.Model.BibleParser2;
 import aston.ASK.BibleApp.Model.WordMap;
