@@ -54,6 +54,9 @@ public class BibleQueries
     public final int countWordAppearances(String word)
     {
         WordRecord wr = wordmap.get(word.toLowerCase());
+        if(wr == null)
+            return 0;
+        
         int appearances = wr.getAppearances().length;
         
         return appearances;

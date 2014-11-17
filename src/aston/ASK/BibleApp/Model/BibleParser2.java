@@ -15,6 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public final class BibleParser2
 {
+    
     private static final String fastLowercaseStrip(String string)
     {
         final char[] ca = string.toCharArray();
@@ -30,10 +31,14 @@ public final class BibleParser2
                 newca[j] = (char) (c | (1 << 5)); //The 6th bit of an ASCII character determines whether it is upper or lowercase. Here we force it to zero
                 j++;
             }
-            else if( c == ' ' || (c <= '9' && c >= '0') ) 
+            else if( c == ' ' || (c <= '9' && c >= '0') || c == '\'' ) 
             {
                 newca[j] = c;
                 j++;
+            }
+            else
+            {
+                
             }
         }
         
@@ -44,49 +49,49 @@ public final class BibleParser2
      * @author antoine
      *
      */
-    private static class ThreadedFileRead extends Thread {
-        private final Queue<String> queue;
-        private final BufferedReader br;
-        
-        public ThreadedFileRead(BufferedReader br, int threadN, Queue<String> queue)
-        {
-            setName("parseline-thread-" + threadN);
-            this.br = br;
-            this.queue = queue;
-        }
-        
-        @Override
-        public void run() {
-            String line;
-            try
-            {
-                while((line = br.readLine()) != null)
-                {
-                    if(line.length() == 0)
-                    {
-                        continue; //Skip blank lines
-                    }
-                    
-                    synchronized(queue)
-                    {
-                        queue.add(line.substring(0)); //I hope this copies a string
-                        queue.notify();
-                    }
-                }
-            }
-            catch (IOException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            
-            synchronized(queue)
-            {
-                queue.add("-STOP-");
-                queue.notify();
-            }
-        }
-    }
+//    private static class ThreadedFileRead extends Thread {
+//        private final Queue<String> queue;
+//        private final BufferedReader br;
+//        
+//        public ThreadedFileRead(BufferedReader br, int threadN, Queue<String> queue)
+//        {
+//            setName("parseline-thread-" + threadN);
+//            this.br = br;
+//            this.queue = queue;
+//        }
+//        
+//        @Override
+//        public void run() {
+//            String line;
+//            try
+//            {
+//                while((line = br.readLine()) != null)
+//                {
+//                    if(line.length() == 0)
+//                    {
+//                        continue; //Skip blank lines
+//                    }
+//                    
+//                    synchronized(queue)
+//                    {
+//                        queue.add(line.substring(0)); //I hope this copies a string
+//                        queue.notify();
+//                    }
+//                }
+//            }
+//            catch (IOException e)
+//            {
+//                // TODO Auto-generated catch block
+//                e.printStackTrace();
+//            }
+//            
+//            synchronized(queue)
+//            {
+//                queue.add("-STOP-");
+//                queue.notify();
+//            }
+//        }
+//    }
     
     private Book book;
     private final WordMap wm;
@@ -109,20 +114,20 @@ public final class BibleParser2
      * @param chapter
      * @param line
      */
-    private final static void parseLine(BibleParser2 bp, Chapter chapter, String line)
+    private final static void parseLine(final BibleParser2 bp, final Chapter chapter, final String line)
     {
         int currentVerse;
 //        String[] lineBits = line.toLowerCase().split(" ");
 //        line = line.toLowerCase();
-        line = fastLowercaseStrip(line);
+        final String lcline = fastLowercaseStrip(line);
         
-        final int verseEnd = line.indexOf(' ');
+        final int verseEnd = lcline.indexOf(' ');
         
         if(verseEnd < 0) return;
         
         try
         {
-            currentVerse = Integer.parseInt(line.substring(0, verseEnd));
+            currentVerse = Integer.parseInt(lcline.substring(0, verseEnd));
         }
         catch(NumberFormatException e)
         {
@@ -132,19 +137,25 @@ public final class BibleParser2
             return;
         }
         
-        chapter.addVerse(line.substring(verseEnd+1), currentVerse);
+        chapter.addVerse(line.substring(verseEnd+1), currentVerse); // record verbatim verse text
         
         
         // Tokenisation algorithm from: http://stackoverflow.com/a/5965814/626946
         int pos = verseEnd+1, end;
         
-        while((end = line.indexOf(' ', pos)) >= 0)
+        while((end = lcline.indexOf(' ', pos)) >= 0)
         {
-            final String word = line.substring(pos, end);
+            final String word = lcline.substring(pos, end);
             
             bp.wm.countWord(bp.book, chapter.chapter, currentVerse, word);
             
             pos = end + 1;
+        }
+        
+        {   // Parse the last word in the line
+            String word = lcline.substring(pos);
+            
+            bp.wm.countWord(bp.book, chapter.chapter, currentVerse, word);
         }
     }
     
@@ -197,84 +208,84 @@ public final class BibleParser2
         return bp.wm;
     }
     
-    static public final WordMap parseFilesMT(String[] files)
-    {
-        BibleParser2 bp = new BibleParser2();
-        
-        for(String file : files)
-        {
-            Queue<String> lineBuffer;
-            ThreadedFileRead tfr = null;
-        
-            lineBuffer = new LinkedBlockingQueue<String>();
-            
-            try
-            {
-                bp.br = new BufferedReader(new FileReader(file), READBUFFERSIZE);
-                
-
-                
-                String title = bp.br.readLine();
-                bp.book = new Book(title, file);
-                
-                Chapter chapter = null;
-                
-                tfr = new ThreadedFileRead(bp.br, 1, lineBuffer);
-                tfr.start();
-                
-                String line;
-                while(true)
-                {
-                    synchronized(lineBuffer)
-                    {
-                        while(lineBuffer.isEmpty())
-                        {
-                            try
-                            {
-                                lineBuffer.wait();
-                            }
-                            catch (InterruptedException e)
-                            {
-                                break;
-                            }
-                        }
-                        
-                        line = lineBuffer.remove();
-                        if("-STOP-".equals(line))
-                        {
-                            break;
-                        }
-                        
-                        if(line.length() == 0)
-                        {
-                            continue; //Skip blank lines
-                        }
-                        
-                        if(line.startsWith("CHAPTER") || line.startsWith("PSALM"))
-                        {
-                            int currentChapter = Integer.parseInt(line.split(" ")[1]);
-                            chapter = bp.book.newChapter(currentChapter);
-                        }
-                        else
-                        {
-                            parseLine(bp, chapter, line);
-                        }
-                    }
-                }
-                
-                tfr.interrupt();
-                
-                bp.br.close();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-                continue;
-            }
-
-        }
-        
-        return bp.wm;
-    }
+//    static public final WordMap parseFilesMT(String[] files)
+//    {
+//        BibleParser2 bp = new BibleParser2();
+//        
+//        for(String file : files)
+//        {
+//            Queue<String> lineBuffer;
+//            ThreadedFileRead tfr = null;
+//        
+//            lineBuffer = new LinkedBlockingQueue<String>();
+//            
+//            try
+//            {
+//                bp.br = new BufferedReader(new FileReader(file), READBUFFERSIZE);
+//                
+//
+//                
+//                String title = bp.br.readLine();
+//                bp.book = new Book(title, file);
+//                
+//                Chapter chapter = null;
+//                
+//                tfr = new ThreadedFileRead(bp.br, 1, lineBuffer);
+//                tfr.start();
+//                
+//                String line;
+//                while(true)
+//                {
+//                    synchronized(lineBuffer)
+//                    {
+//                        while(lineBuffer.isEmpty())
+//                        {
+//                            try
+//                            {
+//                                lineBuffer.wait();
+//                            }
+//                            catch (InterruptedException e)
+//                            {
+//                                break;
+//                            }
+//                        }
+//                        
+//                        line = lineBuffer.remove();
+//                        if("-STOP-".equals(line))
+//                        {
+//                            break;
+//                        }
+//                        
+//                        if(line.length() == 0)
+//                        {
+//                            continue; //Skip blank lines
+//                        }
+//                        
+//                        if(line.startsWith("CHAPTER") || line.startsWith("PSALM"))
+//                        {
+//                            int currentChapter = Integer.parseInt(line.split(" ")[1]);
+//                            chapter = bp.book.newChapter(currentChapter);
+//                        }
+//                        else
+//                        {
+//                            parseLine(bp, chapter, line);
+//                        }
+//                    }
+//                }
+//                
+//                tfr.interrupt();
+//                
+//                bp.br.close();
+//            }
+//            catch (IOException e)
+//            {
+//                e.printStackTrace();
+//                continue;
+//            }
+//
+//        }
+//        
+//        return bp.wm;
+//    }
     
 }
