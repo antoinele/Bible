@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 import aston.ASK.BibleApp.Model.*;
 
 /**
- * @author antoine
+ * @author antoine and Karol
  *
  */
 public class BibleApp
