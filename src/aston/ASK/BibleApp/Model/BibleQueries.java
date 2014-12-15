@@ -2,9 +2,19 @@ package aston.ASK.BibleApp.Model;
 
 import java.util.ArrayList;
 
+/**
+ * The BibleQueries class has functions to perform searches on a WordMap
+ * @author Antoine and Simon
+ *
+ */
 public class BibleQueries
 {
     private final WordMap wordmap;
+    
+    public BibleQueries(WordMap wordmap)
+    {
+        this.wordmap = wordmap;
+    }
     
     /**
      * Extracts only distinct locations from a list of locations, assuming they're all of the same word.
@@ -46,11 +56,11 @@ public class BibleQueries
         return uniqueLocations.toArray(new WordRecord.WordLocation[uniqueLocations.size()]);
     }
     
-    public BibleQueries(WordMap wordmap)
-    {
-        this.wordmap = wordmap;
-    }
-    
+    /**
+     * Counts the number of occurrences of a word in the bible
+     * @param word
+     * @return
+     */
     public final int countWordAppearances(String word)
     {
         WordRecord wr = wordmap.get(word.toLowerCase());
@@ -59,6 +69,11 @@ public class BibleQueries
         return appearances;
     }
 
+    /**
+     * Returns the location of the verses where a word appears
+     * @param word
+     * @return
+     */
     public final WordRecord.WordLocation[] getVersesWithWord(String word)
     {
         WordRecord wr = wordmap.get(word.toLowerCase());
@@ -68,6 +83,12 @@ public class BibleQueries
         return wl;
     }
     
+    /**
+     * Returns the verses in a specified chapter
+     * @param bookTitle
+     * @param chapter
+     * @return
+     */
     public final Verse[] getVerses(String bookTitle, int chapter)
     {
         Book book = Book.getBook(bookTitle);
@@ -81,6 +102,14 @@ public class BibleQueries
         return chapters[chapter-1].getVerses();
     }
     
+    /**
+     * Returns the verses in a specified range from a chapter
+     * @param bookTitle
+     * @param chapter
+     * @param startVerse
+     * @param endVerse
+     * @return
+     */
     public final Verse[] getVerses(String bookTitle, int chapter, int startVerse, int endVerse)
     {
         Verse[] verses = getVerses(bookTitle, chapter);
@@ -101,6 +130,13 @@ public class BibleQueries
         return res;
     }
     
+    /**
+     * Returns a specified verse from a location
+     * @param bookTitle
+     * @param chapter
+     * @param verse
+     * @return
+     */
     public final Verse getVerse(String bookTitle, int chapter, int verse)
     {
         Verse[] verses = getVerses(bookTitle, chapter);
@@ -113,11 +149,21 @@ public class BibleQueries
         return verses[verse-1];
     }
     
+    /**
+     * Gets the short name of a book from the full name
+     * @param bookName
+     * @return
+     */
     public static final String getShortBookName(String bookName) //TODO: Currently unimplemented
     {
         return bookName;
     }
     
+    /**
+     * Gets the full name of a book from the short name
+     * @param bookName
+     * @return
+     */
     public static final String getLongBookName(String bookName) //TODO: Currently unimplemented
     {
         return bookName;

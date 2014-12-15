@@ -1,8 +1,14 @@
 package aston.ASK.BibleApp.Model;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+/**
+ * Stores the chapters of a book
+ * @author Antoine
+ *
+ */
 public final class Book
 {
     static HashMap<String, Book> books = new HashMap<String, Book>();
@@ -21,26 +27,20 @@ public final class Book
         books.put(title, this);
     }
 
+    /**
+     * Get a book by name
+     * @param title
+     * @return
+     */
     public static final Book getBook(String title)
     {
         return books.get(title);
     }
-    
-//    public final String getTitle()
-//    {
-//        return title;
-//    }
-//    
-//    public final String getFile()
-//    {
-//        return file;
-//    }
-//    
-//    public final void setChapters(int n)
-//    {
-//        chaptersN = n;
-//    }
-    
+
+    /**
+     * Returns the last chapter of the book
+     * @return
+     */
     public final Chapter lastChapter()
     {
         return chapters.pollLast();
@@ -51,12 +51,29 @@ public final class Book
         return (b.title == title);
     }
     
+    /**
+     * Add a chapter to a book
+     * @param chapter
+     * @return
+     */
     public final Chapter newChapter(int chapter)
     {
         Chapter c = new Chapter(this, chapter);
         chapters.add(c);
         
         return c;
+    }
+    
+    public String getFullName()
+    {
+    	return title;
+    }
+    
+    public String getShortName()
+    {
+    	File f = new File(file);
+    	String name = f.getName();
+    	return name.substring(0, name.lastIndexOf('.'));
     }
     
     private int cachedHashcode = 0;

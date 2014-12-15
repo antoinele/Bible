@@ -6,7 +6,7 @@ package aston.ASK.BibleApp.Model;
 import java.util.LinkedList;
 
 /**
- * @author antoine
+ * @author Antoine
  *
  */
 public final class Chapter
@@ -26,6 +26,12 @@ public final class Chapter
         verses = new LinkedList<Verse>();
     }
 
+    /**
+     * Add a verse to the chapter
+     * @param text
+     * @param verse
+     * @return
+     */
     public final Verse addVerse(String text, int verse)
     {
         Verse v = new Verse(this, verse, text);
@@ -34,6 +40,9 @@ public final class Chapter
         return v;
     }
     
+    /*
+     * These variables are used to cache the output of the getVerses function
+     */
     private int cachedHashcode = 0;
     private Verse[] cachedVerses;
     

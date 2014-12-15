@@ -11,15 +11,9 @@ import java.util.Map;
  */
 public final class WordMap
 {
-
     final private Map<String, WordRecord> map;
     
     public WordMap()
-    {
-        this(false);
-    }
-    
-    public WordMap(boolean multithreaded)
     {
         /**
          * Used this command:
@@ -28,33 +22,8 @@ public final class WordMap
          * to determine the number of unique words in the bible
          */
         
-        if(multithreaded)
-        {
-            map = new Hashtable<String, WordRecord>(13000);
-        }
-        else
-        {
-            map = new HashMap<String, WordRecord>(13000);
-        }
+        map = new HashMap<String, WordRecord>(13000);
     }
-
-    //TODO: Reinvestigate the viability of this function; the conversion from char array to String is very slow.
-//    /**
-//     * Quickly converts uppercase words to lowercase under the assumption that they're alphabetic only
-//     * @param string
-//     * @return
-//     */
-//    private static final String fastLowercase(String string)
-//    {
-//        char[] ca = string.toCharArray();
-//        
-//        for(int i=0; i<ca.length; i++)
-//        {
-//            ca[i] = (char) (ca[i] & ~0x20); //The 6th bit of an ASCII character determines whether it is upper or lowercase. Here we force it to zero
-//        }
-//        
-//        return new String(ca);
-//    }
     
     public final WordRecord get(String word)
     {
@@ -76,6 +45,13 @@ public final class WordMap
         return map.size();
     }
 
+    /**
+     * Record an occurrence of a word
+     * @param book
+     * @param chapter
+     * @param verse
+     * @param word
+     */
     public final void countWord(Book book, int chapter, int verse, String word)
     {
 //        word = fastLowercase(word);
@@ -89,5 +65,4 @@ public final class WordMap
         
         wr.record(book, chapter, verse);
     }
-    
 }

@@ -4,7 +4,7 @@
 package aston.ASK.BibleApp.Model;
 
 /**
- * @author antoine
+ * @author Karol
  *
  */
 public final class Verse

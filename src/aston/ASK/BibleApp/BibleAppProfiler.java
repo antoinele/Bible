@@ -49,7 +49,7 @@ public class BibleAppProfiler
         }
     }
     
-    @Profile
+    /*@Profile
     public static void fileParsingProfilerMT()
     {        
         final int CYCLES = 100;
@@ -76,7 +76,7 @@ public class BibleAppProfiler
             double parseTime = Double.valueOf(end - start) / (CYCLES * files.length * 1000_000_000d);
             System.out.println(String.format("  Average parse time per file: %f/second", parseTime));
         }
-    }
+    }*/
     
     @Profile
     public static void searchProfiler()
@@ -84,7 +84,7 @@ public class BibleAppProfiler
         final int CYCLES = 100;
         String WORD = "and";
         
-        WordMap wm = BibleParser2.parseFilesMT(files);
+        WordMap wm = BibleParser2.parseFiles(files);
         
         long start = System.nanoTime();
         for(int i=0; i < CYCLES; i++)

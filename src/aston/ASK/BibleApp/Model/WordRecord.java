@@ -2,6 +2,9 @@ package aston.ASK.BibleApp.Model;
 
 import java.util.LinkedList;
 
+/*
+ * @author Antoine
+ */
 public final class WordRecord
 {
 
@@ -61,5 +64,4 @@ public final class WordRecord
     {
         return String.format("%s: %d", word, appearances.size());
     }
-    
 }
