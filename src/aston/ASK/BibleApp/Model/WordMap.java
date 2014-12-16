@@ -5,8 +5,9 @@ import java.util.Hashtable;
 import java.util.Map;
 
 /**
- * Works under the assumption that all words given to it are lowercase
- * @author antoine
+ * Works under the assumption that all words given to it are lowercase.
+ * This is for performance reasons as ensuring the input is lowercase adds seconds to the parsing time.
+ * @author Antoine
  *
  */
 public final class WordMap
@@ -28,16 +29,13 @@ public final class WordMap
     public final WordRecord get(String word)
     {
         return map.get(word);
-//        return map.get(fastLowercase(word));
     }
     
     public final WordRecord put(String word, WordRecord record)
     {
-//        word = word.toLowerCase();
-//        word = fastLowercase(word);
         map.put(word, record);
         
-        return record; // Not sure if this is how it's supposed to be
+        return record;
     }
 
     public final int size()
@@ -46,15 +44,14 @@ public final class WordMap
     }
 
     /**
-     * Record an occurrence of a word
+     * Record the location of a word
      * @param book
      * @param chapter
      * @param verse
-     * @param word
+     * @param word Must be lowercase (or the same case for all words)
      */
     public final void countWord(Book book, int chapter, int verse, String word)
     {
-//        word = fastLowercase(word);
         WordRecord wr = this.get(word);
         
         if(wr == null)

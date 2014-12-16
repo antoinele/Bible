@@ -46,6 +46,10 @@ public final class Chapter
     private int cachedHashcode = 0;
     private Verse[] cachedVerses;
     
+    /**
+     * Returns a list of verses from the chapter, it is cached for optimisation.
+     * @return
+     */
     public final Verse[] getVerses()
     {
         if(cachedHashcode == verses.hashCode())

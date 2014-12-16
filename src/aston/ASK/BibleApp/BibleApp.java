@@ -18,8 +18,16 @@ import aston.ASK.BibleApp.Model.*;
  */
 public class BibleApp
 {   
+	/*
+	*the program runs until false
+	*/
     private boolean run = true;
     
+    /**
+     *
+     * @author Simon
+     * Stores an option for the menu.
+     */
     private final class Option
     {
         public final String methodName;
@@ -98,14 +106,15 @@ public class BibleApp
     }
     
     WordMap wordmap;
-    /**
-     * 
-     */
+  
     private BibleApp(WordMap wm)
     {
         wordmap = wm;
     }
 
+    /**
+     * The following methods below are menu options that are called by the menu() method.
+     */
     @SuppressWarnings("unused")
     private void countOccurences() throws IOException
     {
@@ -276,6 +285,9 @@ public class BibleApp
         System.out.println("Goodbye!");
     }
     
+    /**
+     *  The menu method creates a menu using the above methods as options.
+     */
     private void menu()
     {
         final Option[] options = new Option[] {
@@ -311,13 +323,7 @@ public class BibleApp
      */
     public static void main(String[] args)
     {
-//        boolean mt = false;
-//        if(args[0].equals("--mt"))
-//        {
-//            mt = true;
-//            args = Arrays.copyOfRange(args, 1, args.length);
-//        }
-        
+    	//loads essential classes and then loads options
         WordMap wm = BibleParser2.parseFiles(args);
         BibleApp ba = new BibleApp(wm);
         ba.start();

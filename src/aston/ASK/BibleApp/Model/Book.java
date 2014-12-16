@@ -79,8 +79,13 @@ public final class Book
     private int cachedHashcode = 0;
     private Chapter[] cachedChapters;
     
+    /**
+     * Returns a list of chapters from the book, it is cached for optimisation.
+     * @return
+     */
     public final Chapter[] getChapters()
     {
+    	//Check if the chapters list has changed
         if(cachedHashcode == chapters.hashCode())
         {
             return cachedChapters;

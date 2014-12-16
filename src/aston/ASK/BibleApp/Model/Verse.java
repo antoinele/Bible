@@ -5,8 +5,8 @@ package aston.ASK.BibleApp.Model;
 
 /**
  * @author Karol
- *
  */
+
 public final class Verse
 {
     public final Chapter chapter;

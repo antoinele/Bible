@@ -8,8 +8,15 @@ import java.util.LinkedList;
 public final class WordRecord
 {
 
+	/**
+	 * This class stores the location of a word.
+	 * @author Antoine
+	 */
     public final class WordLocation
     {
+    	/**
+    	 *  The fields are final for optimisation
+    	 */
         public final WordRecord wr;
         public final Book book;
         public final int chapter;
@@ -42,7 +49,12 @@ public final class WordRecord
         this.word = word.toLowerCase();
         this.appearances = new LinkedList<WordLocation>();
     }
-    
+    /**
+     * This records an appearance of a word from a chapter and verse location
+     * @param book
+     * @param chapter
+     * @param verse
+     */
     public final void record(Book book, int chapter, int verse)
     {
         WordLocation wl = new WordLocation(this, book, chapter, verse);
