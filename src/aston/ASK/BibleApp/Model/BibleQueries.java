@@ -64,6 +64,8 @@ public class BibleQueries
     public final int countWordAppearances(String word)
     {
         WordRecord wr = wordmap.get(word.toLowerCase());
+        if(wr == null)
+        	return 0;
         int appearances = wr.getAppearances().length;
         
         return appearances;
@@ -120,7 +122,7 @@ public class BibleQueries
         if(startVerse > verses.length || endVerse < startVerse)
             return null;
         
-        Verse[] res = new Verse[endVerse - startVerse];
+        Verse[] res = new Verse[endVerse - startVerse + 1];
         
         for(int i=startVerse-1,j=0; i<endVerse; i++,j++)
         {
